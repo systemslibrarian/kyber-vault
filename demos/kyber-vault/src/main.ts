@@ -134,6 +134,15 @@ function formatOps(value: number): string {
   return `${value.toFixed(1)} ops/s`;
 }
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function renderButterflyTable(butterflies: ButterflyOp[]): string {
   const layers = new Map<number, ButterflyOp[]>();
   for (const op of butterflies) {
@@ -257,7 +266,7 @@ function render(): void {
             return `<div class="step ${status}" role="listitem"${ariaCurrent}>${step}</div>`;
           })
           .join('')}</div>
-        <p class="status" role="status" aria-live="polite">${state.status}</p>
+        <p class="status" role="status" aria-live="polite">${escapeHtml(state.status)}</p>
         <div class="controls">
           <button id="prev-step" ${state.step === 1 ? 'disabled' : ''}>Prev</button>
           <button id="next-step">${state.step === 4 ? 'Run again' : 'Next'}</button>
@@ -309,15 +318,15 @@ function render(): void {
         <p><strong>AES ciphertext</strong>: <code>${state.hybridPayload?.aesCiphertext.slice(0, 64) ?? '--'}</code></p>
         <p><strong>IV</strong>: <code>${state.hybridPayload?.aesIV ?? '--'}</code></p>
         <p><strong>Tag</strong>: <code>${state.hybridPayload?.aesTag ?? '--'}</code></p>
-        <p class="ok-text" aria-live="polite">${state.hybridDecrypted ? `Decrypted plaintext: ${state.hybridDecrypted}` : ''}</p>
-        <p class="bad-text" role="alert" aria-live="assertive">${state.hybridError}</p>
+        <p class="ok-text" aria-live="polite">${state.hybridDecrypted ? `Decrypted plaintext: ${escapeHtml(state.hybridDecrypted)}` : ''}</p>
+        <p class="bad-text" role="alert" aria-live="assertive">${escapeHtml(state.hybridError)}</p>
       </div>
     </section>
 
     <section class="panel ${state.activeTab === 'lattice' ? 'visible' : ''}" id="panel-lattice" role="tabpanel" aria-labelledby="tab-lattice" ${state.activeTab !== 'lattice' ? 'hidden' : ''}>
       <div class="card">
         <h2>Lattice visualizer (illustrative)</h2>
-        <p>${state.latticeMessage}</p>
+        <p>${escapeHtml(state.latticeMessage)}</p>
         <p>Core ML-KEM modulus is q=${Q}; this panel uses q=${ILLUSTRATIVE_Q} for readability only.</p>
         <div class="matrix" role="img" aria-label="LWE public matrix A, ${state.lwe.m} rows by ${state.lwe.n} columns, values mod ${ILLUSTRATIVE_Q}">${renderLweMatrix(state.lwe)}</div>
         <p><strong>s</strong> = [${state.lwe.s.join(', ')}]</p>
@@ -422,7 +431,7 @@ function render(): void {
         <h3>Benchmark</h3>
         <p>Run 100 iterations each for KeyGen, Encaps, Decaps and compare to X25519 ECDH.</p>
         <button id="run-benchmark" ${state.benchmarkRunning ? 'disabled' : ''}>Run benchmark</button>
-        <p aria-live="polite">${state.benchmarkProgress}</p>
+        <p aria-live="polite">${escapeHtml(state.benchmarkProgress)}</p>
         ${
           state.benchmark
             ? `<table>
@@ -539,6 +548,20 @@ function render(): void {
   const prevStepButton = appRoot.querySelector<HTMLButtonElement>('#prev-step');
   if (prevStepButton) {
     prevStepButton.addEventListener('click', () => {
+      if (state.step === 4) {
+        state.bobSecret = null;
+        state.timings.decaps = undefined;
+      } else if (state.step === 3) {
+        state.encapsResult = null;
+        state.bobSecret = null;
+        state.timings.encaps = undefined;
+        state.timings.decaps = undefined;
+      } else if (state.step === 2) {
+        state.keyPair = null;
+        state.encapsResult = null;
+        state.bobSecret = null;
+        state.timings = {};
+      }
       state.step = Math.max(1, state.step - 1);
       state.status = `Moved to step ${state.step}.`;
       render();
