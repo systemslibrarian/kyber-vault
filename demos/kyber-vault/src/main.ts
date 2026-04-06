@@ -192,32 +192,33 @@ function render(): void {
       <p class="subhead">NIST FIPS 203 standardizes post-quantum key encapsulation for real-world deployment.</p>
     </header>
 
-    <nav class="tabs">
-      <button class="tab ${state.activeTab === 'encaps' ? 'active' : ''}" data-tab="encaps">Encapsulate / Decapsulate</button>
-      <button class="tab ${state.activeTab === 'lattice' ? 'active' : ''}" data-tab="lattice">Lattice visualizer</button>
-      <button class="tab ${state.activeTab === 'params' ? 'active' : ''}" data-tab="params">Parameter sets</button>
-      <button class="tab ${state.activeTab === 'compare' ? 'active' : ''}" data-tab="compare">vs X25519 / RSA</button>
-      <button class="tab ${state.activeTab === 'how' ? 'active' : ''}" data-tab="how">How LWE works</button>
+    <nav class="tabs" role="tablist" aria-label="Demo sections">
+      <button class="tab ${state.activeTab === 'encaps' ? 'active' : ''}" data-tab="encaps" role="tab" aria-selected="${state.activeTab === 'encaps'}" aria-controls="panel-encaps" id="tab-encaps">Encapsulate / Decapsulate</button>
+      <button class="tab ${state.activeTab === 'lattice' ? 'active' : ''}" data-tab="lattice" role="tab" aria-selected="${state.activeTab === 'lattice'}" aria-controls="panel-lattice" id="tab-lattice">Lattice visualizer</button>
+      <button class="tab ${state.activeTab === 'params' ? 'active' : ''}" data-tab="params" role="tab" aria-selected="${state.activeTab === 'params'}" aria-controls="panel-params" id="tab-params">Parameter sets</button>
+      <button class="tab ${state.activeTab === 'compare' ? 'active' : ''}" data-tab="compare" role="tab" aria-selected="${state.activeTab === 'compare'}" aria-controls="panel-compare" id="tab-compare">vs X25519 / RSA</button>
+      <button class="tab ${state.activeTab === 'how' ? 'active' : ''}" data-tab="how" role="tab" aria-selected="${state.activeTab === 'how'}" aria-controls="panel-how" id="tab-how">How LWE works</button>
     </nav>
 
-    <section class="panel ${state.activeTab === 'encaps' ? 'visible' : ''}">
+    <section class="panel ${state.activeTab === 'encaps' ? 'visible' : ''}" id="panel-encaps" role="tabpanel" aria-labelledby="tab-encaps" ${state.activeTab !== 'encaps' ? 'hidden' : ''}>
       <div class="pill-row">
         ${VARIANTS.map(
           (variant) =>
-            `<button class="pill ${state.variant === variant ? 'active' : ''}" data-variant="${variant}">${variantDisplay(variant)}</button>`,
+            `<button class="pill ${state.variant === variant ? 'active' : ''}" data-variant="${variant}" aria-pressed="${state.variant === variant}">${variantDisplay(variant)}</button>`,
         ).join('')}
       </div>
 
       <div class="card">
         <h2>ML-KEM stepper</h2>
-        <div class="stepper">${stepDescriptions
+        <div class="stepper" role="list" aria-label="ML-KEM protocol steps">${stepDescriptions
           .map((step, index) => {
             const stepNo = index + 1;
             const status = stepNo < state.step ? 'done' : stepNo === state.step ? 'current' : 'todo';
-            return `<div class="step ${status}">${step}</div>`;
+            const ariaCurrent = status === 'current' ? ' aria-current="step"' : '';
+            return `<div class="step ${status}" role="listitem"${ariaCurrent}>${step}</div>`;
           })
           .join('')}</div>
-        <p class="status">${state.status}</p>
+        <p class="status" role="status" aria-live="polite">${state.status}</p>
         <div class="controls">
           <button id="prev-step" ${state.step === 1 ? 'disabled' : ''}>Prev</button>
           <button id="next-step">${state.step === 4 ? 'Run again' : 'Next'}</button>
@@ -246,7 +247,7 @@ function render(): void {
           <p>Decaps: ${formatMs(state.timings.decaps)}</p>
           ${
             state.step === 4
-              ? `<div class="match ${sharedSecretsMatch ? 'ok' : 'bad'}">${
+              ? `<div class="match ${sharedSecretsMatch ? 'ok' : 'bad'}" role="alert">${
                   sharedSecretsMatch ? 'Shared secrets match' : 'Shared secrets differ'
                 }</div>`
               : ''
@@ -257,7 +258,8 @@ function render(): void {
       <div class="card">
         <h2>Full hybrid encryption (ML-KEM + AES-256-GCM)</h2>
         <p>Flow: Encaps -> HKDF-SHA256(salt=kyber-vault-v1) -> AES-256-GCM encrypt/decrypt.</p>
-        <textarea id="hybrid-message" rows="4" placeholder="Enter a message to encrypt"></textarea>
+        <label for="hybrid-message" class="sr-only">Message to encrypt</label>
+        <textarea id="hybrid-message" rows="4" placeholder="Enter a message to encrypt" aria-label="Message to encrypt"></textarea>
         <div class="controls">
           <button id="hybrid-encrypt">Encrypt message</button>
           <button id="hybrid-decrypt" ${state.hybridPayload ? '' : 'disabled'}>Decrypt message</button>
@@ -268,17 +270,17 @@ function render(): void {
         <p><strong>AES ciphertext</strong>: <code>${state.hybridPayload?.aesCiphertext.slice(0, 64) ?? '--'}</code></p>
         <p><strong>IV</strong>: <code>${state.hybridPayload?.aesIV ?? '--'}</code></p>
         <p><strong>Tag</strong>: <code>${state.hybridPayload?.aesTag ?? '--'}</code></p>
-        <p class="ok-text">${state.hybridDecrypted ? `Decrypted plaintext: ${state.hybridDecrypted}` : ''}</p>
-        <p class="bad-text">${state.hybridError}</p>
+        <p class="ok-text" aria-live="polite">${state.hybridDecrypted ? `Decrypted plaintext: ${state.hybridDecrypted}` : ''}</p>
+        <p class="bad-text" role="alert" aria-live="assertive">${state.hybridError}</p>
       </div>
     </section>
 
-    <section class="panel ${state.activeTab === 'lattice' ? 'visible' : ''}">
+    <section class="panel ${state.activeTab === 'lattice' ? 'visible' : ''}" id="panel-lattice" role="tabpanel" aria-labelledby="tab-lattice" ${state.activeTab !== 'lattice' ? 'hidden' : ''}>
       <div class="card">
         <h2>Lattice visualizer (illustrative)</h2>
         <p>${state.latticeMessage}</p>
         <p>Core ML-KEM modulus is q=${Q}; this panel uses q=${ILLUSTRATIVE_Q} for readability only.</p>
-        <div class="matrix">${renderLweMatrix(state.lwe)}</div>
+        <div class="matrix" role="img" aria-label="LWE public matrix A, ${state.lwe.m} rows by ${state.lwe.n} columns, values mod ${ILLUSTRATIVE_Q}">${renderLweMatrix(state.lwe)}</div>
         <p><strong>s</strong> = [${state.lwe.s.join(', ')}]</p>
         <p><strong>e</strong> = [${state.lwe.e.join(', ')}]</p>
         <p><strong>b</strong> = [${state.lwe.b.join(', ')}]</p>
@@ -290,17 +292,17 @@ function render(): void {
       </div>
     </section>
 
-    <section class="panel ${state.activeTab === 'params' ? 'visible' : ''}">
+    <section class="panel ${state.activeTab === 'params' ? 'visible' : ''}" id="panel-params" role="tabpanel" aria-labelledby="tab-params" ${state.activeTab !== 'params' ? 'hidden' : ''}>
       <div class="grid-three">
         ${VARIANTS.map((variant) => {
           const p = ML_KEM_PARAMS[variant];
-          return `<article class="card clickable" data-go-variant="${variant}">
+          return `<article class="card clickable" data-go-variant="${variant}" role="button" tabindex="0" aria-label="Select ${variantDisplay(variant)} and go to Encapsulate tab">
             <h3>${variantDisplay(variant)}</h3>
             <p>Security category ${p.securityCategory}</p>
             <p>Public key: ${p.publicKey} bytes</p>
             <p>Private key: ${p.privateKey} bytes</p>
             <p>Ciphertext: ${p.ciphertext} bytes</p>
-            <div class="bar" style="--w:${Math.round((p.publicKey / 1568) * 100)}%"></div>
+            <div class="bar" style="--w:${Math.round((p.publicKey / 1568) * 100)}%" role="img" aria-label="Relative key size: ${Math.round((p.publicKey / 1568) * 100)}%"></div>
           </article>`;
         }).join('')}
       </div>
@@ -310,7 +312,7 @@ function render(): void {
       </div>
     </section>
 
-    <section class="panel ${state.activeTab === 'compare' ? 'visible' : ''}">
+    <section class="panel ${state.activeTab === 'compare' ? 'visible' : ''}" id="panel-compare" role="tabpanel" aria-labelledby="tab-compare" ${state.activeTab !== 'compare' ? 'hidden' : ''}>
       <div class="card">
         <h2>KEM vs key exchange</h2>
         <p>X25519 is classical ECDH, while ML-KEM is a post-quantum key encapsulation mechanism. Hybrid migration combines X25519 + ML-KEM to hedge against both quantum and implementation risk.</p>
@@ -319,7 +321,7 @@ function render(): void {
         <h3>Size comparison</h3>
         <table>
           <thead>
-            <tr><th>Scheme</th><th>Public key / payload</th><th>Notes</th></tr>
+            <tr><th scope="col">Scheme</th><th scope="col">Public key / payload</th><th scope="col">Notes</th></tr>
           </thead>
           <tbody>
             <tr><td>RSA-2048</td><td>256 B modulus</td><td>Classical, no PQ security</td></tr>
@@ -334,12 +336,12 @@ function render(): void {
         <h3>Benchmark</h3>
         <p>Run 100 iterations each for KeyGen, Encaps, Decaps and compare to X25519 ECDH.</p>
         <button id="run-benchmark" ${state.benchmarkRunning ? 'disabled' : ''}>Run benchmark</button>
-        <p>${state.benchmarkProgress}</p>
+        <p aria-live="polite">${state.benchmarkProgress}</p>
         ${
           state.benchmark
             ? `<table>
           <thead>
-            <tr><th>Variant</th><th>KeyGen</th><th>Encaps</th><th>Decaps</th></tr>
+            <tr><th scope="col">Variant</th><th scope="col">KeyGen</th><th scope="col">Encaps</th><th scope="col">Decaps</th></tr>
           </thead>
           <tbody>
             ${state.benchmark.variants
@@ -365,15 +367,15 @@ function render(): void {
       </div>
     </section>
 
-    <section class="panel ${state.activeTab === 'how' ? 'visible' : ''}">
+    <section class="panel ${state.activeTab === 'how' ? 'visible' : ''}" id="panel-how" role="tabpanel" aria-labelledby="tab-how" ${state.activeTab !== 'how' ? 'hidden' : ''}>
       <div class="card">
         <h2>How LWE works</h2>
-        <div class="stepper">
-          <div class="step ${state.learnStep === 1 ? 'current' : ''}">1. LWE setup: publish A and b = As + e (mod q).</div>
-          <div class="step ${state.learnStep === 2 ? 'current' : ''}">2. Noise masks linear structure and blocks direct solving.</div>
-          <div class="step ${state.learnStep === 3 ? 'current' : ''}">3. Build PKE by embedding message bits in noisy equations.</div>
-          <div class="step ${state.learnStep === 4 ? 'current' : ''}">4. Module-LWE upgrades to polynomials in Zq[X]/(X^256 + 1), q=3329.</div>
-          <div class="step ${state.learnStep === 5 ? 'current' : ''}">5. Fujisaki-Okamoto transform upgrades PKE to IND-CCA2 KEM.</div>
+        <div class="stepper" role="list" aria-label="LWE concept steps">
+          <div class="step ${state.learnStep === 1 ? 'current' : ''}" role="listitem"${state.learnStep === 1 ? ' aria-current="step"' : ''}>1. LWE setup: publish A and b = As + e (mod q).</div>
+          <div class="step ${state.learnStep === 2 ? 'current' : ''}" role="listitem"${state.learnStep === 2 ? ' aria-current="step"' : ''}>2. Noise masks linear structure and blocks direct solving.</div>
+          <div class="step ${state.learnStep === 3 ? 'current' : ''}" role="listitem"${state.learnStep === 3 ? ' aria-current="step"' : ''}>3. Build PKE by embedding message bits in noisy equations.</div>
+          <div class="step ${state.learnStep === 4 ? 'current' : ''}" role="listitem"${state.learnStep === 4 ? ' aria-current="step"' : ''}>4. Module-LWE upgrades to polynomials in Zq[X]/(X^256 + 1), q=3329.</div>
+          <div class="step ${state.learnStep === 5 ? 'current' : ''}" role="listitem"${state.learnStep === 5 ? ' aria-current="step"' : ''}>5. Fujisaki-Okamoto transform upgrades PKE to IND-CCA2 KEM.</div>
         </div>
         <div class="controls">
           <button id="learn-prev" ${state.learnStep === 1 ? 'disabled' : ''}>Prev concept</button>
@@ -416,12 +418,19 @@ function render(): void {
   });
 
   appRoot.querySelectorAll<HTMLElement>('[data-go-variant]').forEach((card) => {
-    card.addEventListener('click', () => {
+    const handler = () => {
       const nextVariant = card.dataset.goVariant as MLKEMVariant;
       state.variant = nextVariant;
       state.activeTab = 'encaps';
       resetFlow();
       render();
+    };
+    card.addEventListener('click', handler);
+    card.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handler();
+      }
     });
   });
 
