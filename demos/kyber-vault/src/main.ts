@@ -17,6 +17,12 @@ import {
   type LWEInstance,
   verifyLWEWithQ,
 } from './crypto/lwe';
+import {
+  type ButterflyOp,
+  polyMultiplyNTT,
+  polyMultiplySchoolbook,
+  randomSmallPoly,
+} from './crypto/ntt';
 
 type TabId = 'encaps' | 'lattice' | 'params' | 'compare' | 'how';
 
@@ -45,6 +51,17 @@ const state: {
   hybridError: string;
   lwe: LWEInstance;
   latticeMessage: string;
+  nttA: number[];
+  nttB: number[];
+  nttResult: {
+    result: number[];
+    nttA: number[];
+    nttB: number[];
+    pointwise: number[];
+    butterfliesA: ButterflyOp[];
+    butterfliesB: ButterflyOp[];
+  } | null;
+  nttSchoolbook: number[] | null;
   benchmark: BenchmarkReport | null;
   benchmarkProgress: string;
   benchmarkRunning: boolean;
@@ -64,6 +81,10 @@ const state: {
   hybridError: '',
   lwe: generateIllustrativeLWEInstance(6, 4, ILLUSTRATIVE_Q),
   latticeMessage: 'Educational instance uses q=17. Core ML-KEM uses q=3329.',
+  nttA: randomSmallPoly(8),
+  nttB: randomSmallPoly(8),
+  nttResult: null,
+  nttSchoolbook: null,
   benchmark: null,
   benchmarkProgress: '',
   benchmarkRunning: false,
@@ -111,6 +132,24 @@ function formatMs(value: number | undefined): string {
 
 function formatOps(value: number): string {
   return `${value.toFixed(1)} ops/s`;
+}
+
+function renderButterflyTable(butterflies: ButterflyOp[]): string {
+  const layers = new Map<number, ButterflyOp[]>();
+  for (const op of butterflies) {
+    const arr = layers.get(op.layer) ?? [];
+    arr.push(op);
+    layers.set(op.layer, arr);
+  }
+  let html = '';
+  for (const [layer, ops] of layers) {
+    html += `<div class="ntt-layer"><span class="ntt-layer-label">Layer ${layer + 1}</span>`;
+    for (const op of ops) {
+      html += `<span class="ntt-butterfly" title="ω=${op.twiddle}: a[${op.i}]=${op.beforeI}, a[${op.j}]=${op.beforeJ} → ${op.afterI}, ${op.afterJ}">[${op.i},${op.j}]</span>`;
+    }
+    html += '</div>';
+  }
+  return html;
 }
 
 function renderLweMatrix(instance: LWEInstance): string {
@@ -289,6 +328,53 @@ function render(): void {
           <button id="new-lwe">New random instance</button>
           <button id="bruteforce">Show why brute force fails</button>
         </div>
+      </div>
+
+      <div class="card">
+        <h2>NTT polynomial multiplication</h2>
+        <p>Kyber multiplies polynomials in Z<sub>${Q}</sub>[X]/(X<sup>256</sup>+1) using the <strong>Number Theoretic Transform</strong> — an FFT over a finite field.</p>
+        <p>This demo uses n=8 coefficients (mod ${Q}) so the butterfly structure is visible. Full Kyber uses n=256.</p>
+        <div class="grid-two">
+          <div>
+            <h3>a(x)</h3>
+            <code>[${state.nttA.join(', ')}]</code>
+          </div>
+          <div>
+            <h3>b(x)</h3>
+            <code>[${state.nttB.join(', ')}]</code>
+          </div>
+        </div>
+        <div class="controls" style="margin-top:0.7rem">
+          <button id="ntt-run">Run NTT multiply</button>
+          <button id="ntt-new">New random polynomials</button>
+        </div>
+        ${state.nttResult ? `
+        <div class="ntt-result-grid">
+          <div>
+            <h3>NTT(a)</h3>
+            <code>[${state.nttResult.nttA.join(', ')}]</code>
+            <div class="ntt-butterflies" role="img" aria-label="Butterfly operations for polynomial a">${renderButterflyTable(state.nttResult.butterfliesA)}</div>
+          </div>
+          <div>
+            <h3>NTT(b)</h3>
+            <code>[${state.nttResult.nttB.join(', ')}]</code>
+            <div class="ntt-butterflies" role="img" aria-label="Butterfly operations for polynomial b">${renderButterflyTable(state.nttResult.butterfliesB)}</div>
+          </div>
+        </div>
+        <div>
+          <h3>Pointwise NTT(a) ⊙ NTT(b)</h3>
+          <code>[${state.nttResult.pointwise.join(', ')}]</code>
+        </div>
+        <div>
+          <h3>INTT → product</h3>
+          <code>[${state.nttResult.result.join(', ')}]</code>
+        </div>
+        <div class="match ${state.nttSchoolbook && state.nttResult.result.every((v, i) => v === state.nttSchoolbook![i]) ? 'ok' : 'bad'}" role="alert">
+          Schoolbook check: [${(state.nttSchoolbook ?? []).join(', ')}]
+          — ${state.nttSchoolbook && state.nttResult.result.every((v, i) => v === state.nttSchoolbook![i]) ? 'Results match (NTT = schoolbook)' : 'Mismatch'}
+        </div>
+        <p>NTT uses <strong>${state.nttResult.butterfliesA.length}</strong> butterfly ops per polynomial (O(n log n)) vs <strong>${state.nttA.length * state.nttA.length}</strong> multiplications for schoolbook (O(n²)).</p>
+        ` : ''}
       </div>
     </section>
 
@@ -525,6 +611,26 @@ function render(): void {
   if (bruteForceButton) {
     bruteForceButton.addEventListener('click', () => {
       state.latticeMessage = bruteForceSearchSpace(6);
+      render();
+    });
+  }
+
+  const nttRunButton = appRoot.querySelector<HTMLButtonElement>('#ntt-run');
+  if (nttRunButton) {
+    nttRunButton.addEventListener('click', () => {
+      state.nttResult = polyMultiplyNTT(state.nttA, state.nttB);
+      state.nttSchoolbook = polyMultiplySchoolbook(state.nttA, state.nttB);
+      render();
+    });
+  }
+
+  const nttNewButton = appRoot.querySelector<HTMLButtonElement>('#ntt-new');
+  if (nttNewButton) {
+    nttNewButton.addEventListener('click', () => {
+      state.nttA = randomSmallPoly(8);
+      state.nttB = randomSmallPoly(8);
+      state.nttResult = null;
+      state.nttSchoolbook = null;
       render();
     });
   }

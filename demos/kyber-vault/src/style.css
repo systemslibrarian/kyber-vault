@@ -338,6 +338,48 @@ textarea {
   background: linear-gradient(90deg, #45a4ff, #4de6b2);
 }
 
+/* --- NTT visualisation --- */
+.ntt-result-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 0.8rem 0;
+}
+
+.ntt-butterflies {
+  margin-top: 0.5rem;
+}
+
+.ntt-layer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.ntt-layer-label {
+  font: 600 0.78rem var(--sans);
+  color: var(--accent);
+  min-width: 4.5rem;
+}
+
+.ntt-butterfly {
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.2rem 0.45rem;
+  font: 700 0.75rem var(--mono);
+  color: var(--ink0);
+  background: linear-gradient(180deg, rgba(77, 230, 178, 0.08), rgba(12, 20, 31, 0.95));
+  cursor: default;
+}
+
+.ntt-butterfly:hover {
+  border-color: var(--accent);
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -394,7 +436,8 @@ blockquote {
   }
 
   .grid-two,
-  .grid-three {
+  .grid-three,
+  .ntt-result-grid {
     grid-template-columns: 1fr;
   }
 
