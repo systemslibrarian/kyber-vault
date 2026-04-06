@@ -20,6 +20,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - id: pages
+        uses: actions/configure-pages@v5
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -36,6 +39,8 @@ jobs:
 
       - name: Build
         working-directory: demos/kyber-vault
+        env:
+          VITE_BASE_PATH: ${{ steps.pages.outputs.base_path }}
         run: npm run build
 
       - uses: actions/upload-pages-artifact@v3

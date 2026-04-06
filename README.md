@@ -25,4 +25,6 @@ Browser demo for ML-KEM (CRYSTALS-Kyber), the post-quantum key encapsulation mec
 
 ## Demo
 
+**[Live demo](https://systemslibrarian.github.io/crypto-lab-kyber-vault/)**
+
 Implementation lives in `demos/kyber-vault`.

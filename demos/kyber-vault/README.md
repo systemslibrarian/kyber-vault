@@ -9,6 +9,10 @@
 - Hybrid encryption flow: ML-KEM key encapsulation + HKDF-SHA256 + AES-256-GCM.
 - Benchmark runner for KeyGen/Encaps/Decaps and X25519 ECDH comparison.
 
+## Live Demo
+
+**[https://systemslibrarian.github.io/crypto-lab-kyber-vault/](https://systemslibrarian.github.io/crypto-lab-kyber-vault/)**
+
 ## Run Locally
 
 ```bash
