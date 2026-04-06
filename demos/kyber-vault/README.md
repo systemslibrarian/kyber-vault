@@ -21,6 +21,7 @@ npm run dev
 - Package: `@noble/post-quantum`
 - Version: `0.6.0` (installed from npm)
 - Exports used: `ml_kem512`, `ml_kem768`, `ml_kem1024` with `keygen`, `encapsulate`, `decapsulate`
+- Package existence/API verified via `npm view` and installed module type definitions
 
 ## FIPS 203 Reference
 
@@ -38,3 +39,7 @@ Parameter byte sizes in this demo match FIPS 203 parameter set table values:
 ## Security Note: Implicit Rejection
 
 ML-KEM decapsulation is designed for implicit rejection behavior. When ciphertext or secret key material is incorrect, decapsulation returns a pseudorandom-looking shared secret instead of raising an explicit decryption error. In this demo, integrity failure is surfaced by AES-GCM authentication failure in the hybrid layer.
+
+## Offline Runtime
+
+The app is fully local after `npm install`; no external CDN resources are required at runtime.
