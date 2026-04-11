@@ -10,7 +10,7 @@ function normalizeBasePath(basePath: string): string {
 
 export default defineConfig(({ mode }) => {
   const configuredBase = process.env.VITE_BASE_PATH;
-  const fallbackBase = mode === 'production' ? '/kyber-vault/' : '/';
+  const fallbackBase = mode === 'production' ? '/crypto-lab-kyber-vault/' : '/';
 
   return {
     base: normalizeBasePath(configuredBase ?? fallbackBase),

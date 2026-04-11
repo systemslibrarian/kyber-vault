@@ -18,6 +18,12 @@
   --serif: "Libre Baskerville", Georgia, serif;
 }
 
+html[data-theme='light'] {
+  --bg0: var(--ink0);
+  --bg1: var(--ink1);
+  --bg2: var(--ink2);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -87,11 +93,98 @@ code {
 }
 
 .hero-header {
+  position: relative;
   border: 1px solid var(--line);
   border-radius: 18px;
   padding: 1.4rem 1.5rem;
   background: linear-gradient(135deg, rgba(8, 16, 27, 0.92), rgba(16, 29, 45, 0.85));
   box-shadow: var(--shadow);
+}
+
+html[data-theme='light'] .hero-header {
+  background: linear-gradient(135deg, var(--bg0), var(--bg1));
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  width: 2.6rem;
+  height: 2.6rem;
+  min-width: 2.6rem;
+  min-height: 2.6rem;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--bg2);
+  color: var(--ink0);
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+html[data-theme='light'] body {
+  color: var(--line);
+  background: linear-gradient(160deg, var(--bg0), var(--bg1) 45%, var(--bg2));
+}
+
+html[data-theme='light'] .card {
+  background: color-mix(in srgb, var(--bg0) 86%, var(--bg1));
+}
+
+html[data-theme='light'] h1,
+html[data-theme='light'] h2,
+html[data-theme='light'] h3,
+html[data-theme='light'] .subhead {
+  color: var(--line);
+}
+
+html[data-theme='light'] .eyebrow,
+html[data-theme='light'] .tab,
+html[data-theme='light'] .pill,
+html[data-theme='light'] button,
+html[data-theme='light'] textarea,
+html[data-theme='light'] code,
+html[data-theme='light'] .ntt-butterfly,
+html[data-theme='light'] .ntt-layer-label {
+  color: var(--line);
+}
+
+html[data-theme='light'] .step,
+html[data-theme='light'] textarea,
+html[data-theme='light'] code,
+html[data-theme='light'] .tab,
+html[data-theme='light'] .pill,
+html[data-theme='light'] button,
+html[data-theme='light'] .ntt-butterfly {
+  background: color-mix(in srgb, var(--bg0) 90%, var(--bg2));
+}
+
+html[data-theme='light'] .match.ok {
+  color: var(--ok);
+}
+
+html[data-theme='light'] .match.bad {
+  color: var(--danger);
+}
+
+html[data-theme='light'] .ok-text {
+  color: var(--ok);
+}
+
+html[data-theme='light'] .bad-text {
+  color: var(--danger);
+}
+
+html[data-theme='light'] blockquote {
+  color: var(--ink0);
+  background: color-mix(in srgb, var(--accent-soft) 50%, var(--bg0));
 }
 
 .eyebrow {

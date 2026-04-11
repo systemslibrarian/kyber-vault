@@ -1,49 +1,33 @@
 # kyber-vault demo
 
-`kyber-vault` is a browser-based ML-KEM (CRYSTALS-Kyber) educational demo for the `crypto-compare` portfolio.
+## 1. What It Is
 
-## What This Demo Shows
+`kyber-vault` is a browser demo of ML-KEM (CRYSTALS-Kyber), including ML-KEM-512, ML-KEM-768, and ML-KEM-1024 flows from key generation through encapsulation and decapsulation. It also demonstrates a hybrid construction using ML-KEM + HKDF-SHA256 + AES-256-GCM for authenticated message encryption. The core problem solved here is quantum-resistant key establishment so two parties can derive a shared secret over an untrusted network. This is post-quantum asymmetric cryptography (a KEM), with an additional symmetric authenticated-encryption layer in the hybrid path.
 
-- Encapsulation and decapsulation workflow for ML-KEM-512, ML-KEM-768, and ML-KEM-1024.
-- LWE arithmetic visualizer (`b = As + e (mod q)`) with an educational small-modulus matrix display.
-- Hybrid encryption flow: ML-KEM key encapsulation + HKDF-SHA256 + AES-256-GCM.
-- Benchmark runner for KeyGen/Encaps/Decaps and X25519 ECDH comparison.
+## 2. When to Use It
 
-## Live Demo
+- Use ML-KEM when designing new systems that need long-term confidentiality against harvest-now-decrypt-later threats, because it provides post-quantum key establishment.
+- Use the hybrid ML-KEM + AES-256-GCM path when you need to exchange a message after deriving key material, because it shows a complete KEM-to-encryption workflow.
+- Use ML-KEM-512/768/1024 selection in testing or architecture reviews, because different parameter sets let you evaluate size and performance trade-offs.
+- Do not use this demo as production cryptographic infrastructure, because it is an educational browser implementation and not a hardened deployment target.
 
-**[https://systemslibrarian.github.io/crypto-lab-kyber-vault/](https://systemslibrarian.github.io/crypto-lab-kyber-vault/)**
+## 3. Live Demo
 
-## Run Locally
+Live demo: [https://systemslibrarian.github.io/crypto-lab-kyber-vault/](https://systemslibrarian.github.io/crypto-lab-kyber-vault/)
+
+In the demo, you can step through KeyGen, Encaps, and Decaps, inspect artifacts and timings, and run a hybrid encrypt/decrypt flow. You can switch between ML-KEM-512, ML-KEM-768, and ML-KEM-1024, generate illustrative LWE/NTT examples, and run benchmark iterations for ML-KEM and X25519 comparison.
+
+## 4. How to Run Locally
 
 ```bash
+git clone https://github.com/systemslibrarian/crypto-lab-kyber-vault.git
+cd crypto-lab-kyber-vault/demos/kyber-vault
 npm install
 npm run dev
 ```
 
-## ML-KEM Implementation Source
+No environment variables are required for local development.
 
-- Package: `@noble/post-quantum`
-- Version: `0.6.0` (installed from npm)
-- Exports used: `ml_kem512`, `ml_kem768`, `ml_kem1024` with `keygen`, `encapsulate`, `decapsulate`
-- Package existence/API verified via `npm view` and installed module type definitions
+## 5. Part of the Crypto-Lab Suite
 
-## FIPS 203 Reference
-
-Authoritative specification:
-
-- NIST FIPS 203 (August 2024): https://csrc.nist.gov/pubs/fips/203/final
-- CRYSTALS-Kyber resources: https://pq-crystals.org/kyber/
-
-Parameter byte sizes in this demo match FIPS 203 parameter set table values:
-
-- ML-KEM-512: public key 800, private key 1632, ciphertext 768, shared secret 32
-- ML-KEM-768: public key 1184, private key 2400, ciphertext 1088, shared secret 32
-- ML-KEM-1024: public key 1568, private key 3168, ciphertext 1568, shared secret 32
-
-## Security Note: Implicit Rejection
-
-ML-KEM decapsulation is designed for implicit rejection behavior. When ciphertext or secret key material is incorrect, decapsulation returns a pseudorandom-looking shared secret instead of raising an explicit decryption error. In this demo, integrity failure is surfaced by AES-GCM authentication failure in the hybrid layer.
-
-## Offline Runtime
-
-The app is fully local after `npm install`; no external CDN resources are required at runtime.
+This demo is part of the broader Crypto-Lab collection at https://systemslibrarian.github.io/crypto-lab/.
