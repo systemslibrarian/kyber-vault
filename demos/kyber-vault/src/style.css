@@ -19,9 +19,19 @@
 }
 
 html[data-theme='light'] {
-  --bg0: var(--ink0);
-  --bg1: var(--ink1);
-  --bg2: var(--ink2);
+  --bg0: #f3f8ff;
+  --bg1: #e8f0fa;
+  --bg2: #dce7f4;
+  --ink0: #0f1621;
+  --ink1: #22324a;
+  --ink2: #4a5f80;
+  --line: #9fb2cb;
+  --accent: #0f8b66;
+  --accent-soft: rgba(15, 139, 102, 0.16);
+  --warn: #8a5a00;
+  --danger: #9c2f2a;
+  --ok: #0d7f3a;
+  --shadow: 0 8px 28px rgba(15, 22, 33, 0.14);
 }
 
 * {
@@ -129,48 +139,50 @@ html[data-theme='light'] .hero-header {
   background: var(--accent-soft);
 }
 
+/* --- Light-theme overrides for hardcoded dark backgrounds and neon text --- */
 html[data-theme='light'] body {
-  color: var(--line);
   background: linear-gradient(160deg, var(--bg0), var(--bg1) 45%, var(--bg2));
 }
 
+html[data-theme='light'] code {
+  background: var(--bg2);
+}
+
+html[data-theme='light'] .tab,
+html[data-theme='light'] .pill,
+html[data-theme='light'] button {
+  background: var(--bg1);
+}
+
 html[data-theme='light'] .card {
-  background: color-mix(in srgb, var(--bg0) 86%, var(--bg1));
+  background: var(--bg0);
 }
 
-html[data-theme='light'] h1,
-html[data-theme='light'] h2,
-html[data-theme='light'] h3,
-html[data-theme='light'] .subhead {
-  color: var(--line);
+html[data-theme='light'] .step {
+  background: var(--bg1);
 }
 
-html[data-theme='light'] .eyebrow,
-html[data-theme='light'] .tab,
-html[data-theme='light'] .pill,
-html[data-theme='light'] button,
-html[data-theme='light'] textarea,
-html[data-theme='light'] code,
-html[data-theme='light'] .ntt-butterfly,
-html[data-theme='light'] .ntt-layer-label {
-  color: var(--line);
+html[data-theme='light'] .step.current {
+  color: var(--warn);
 }
 
-html[data-theme='light'] .step,
-html[data-theme='light'] textarea,
-html[data-theme='light'] code,
-html[data-theme='light'] .tab,
-html[data-theme='light'] .pill,
-html[data-theme='light'] button,
-html[data-theme='light'] .ntt-butterfly {
-  background: color-mix(in srgb, var(--bg0) 90%, var(--bg2));
+html[data-theme='light'] .step.done {
+  color: var(--ok);
+}
+
+html[data-theme='light'] textarea {
+  background: var(--bg0);
 }
 
 html[data-theme='light'] .match.ok {
+  background: rgba(13, 127, 58, 0.12);
+  border-color: var(--ok);
   color: var(--ok);
 }
 
 html[data-theme='light'] .match.bad {
+  background: rgba(156, 47, 42, 0.12);
+  border-color: var(--danger);
   color: var(--danger);
 }
 
@@ -182,9 +194,21 @@ html[data-theme='light'] .bad-text {
   color: var(--danger);
 }
 
+html[data-theme='light'] .cell {
+  background: linear-gradient(
+    180deg,
+    rgba(15, 139, 102, calc(var(--intensity) * 0.006)),
+    var(--bg1)
+  );
+}
+
+html[data-theme='light'] .ntt-butterfly {
+  background: var(--bg1);
+}
+
 html[data-theme='light'] blockquote {
   color: var(--ink0);
-  background: color-mix(in srgb, var(--accent-soft) 50%, var(--bg0));
+  background: var(--accent-soft);
 }
 
 .eyebrow {
